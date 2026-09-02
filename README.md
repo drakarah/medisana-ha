@@ -40,17 +40,33 @@ engineering work from https://github.com/keptenkurk/BS440.
 
 ## Installation
 
+### Option A: HACS (recommended)
+
+[HACS](https://hacs.xyz/) doesn't (yet) list this integration in its default
+store, so add it as a **custom repository**:
+
+1. In Home Assistant, open **HACS → Integrations**.
+2. Click the **⋮** menu (top right) → **Custom repositories**.
+3. Add `https://github.com/drakarah/medisana-ha` as the repository URL, and
+   choose **Integration** as the category.
+4. Find **Medisana BS444 Scale** in HACS and click **Download**.
+5. Restart Home Assistant.
+
+### Option B: Manual install
+
 1. Copy the `custom_components/medisana_bs444` folder from this repository
-   into your Home Assistant `config/custom_components/` directory (or install
-   it via [HACS](https://hacs.xyz/) as a custom repository).
+   into your Home Assistant `config/custom_components/` directory.
 2. Restart Home Assistant.
-3. Make sure at least one Bluetooth adapter or ESPHome Bluetooth proxy
+
+### After installing (either option)
+
+1. Make sure at least one Bluetooth adapter or ESPHome Bluetooth proxy
    (`bluetooth_proxy` with `active: true`) is set up and in range of the
    scale.
-4. Step on the scale once so it advertises. Home Assistant should
+2. Step on the scale once so it advertises. Home Assistant should
    automatically discover it (**Settings → Devices & Services**); alternatively
    add it manually via **Add Integration → Medisana BS444 Scale**.
-5. During setup, enable **Use time offset** for BS410 and BS444 scales (this
+3. During setup, enable **Use time offset** for BS410 and BS444 scales (this
    matches the ESPHome component's `timeoffset: true` option).
 
 ## Entities
