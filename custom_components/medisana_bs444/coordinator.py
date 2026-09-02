@@ -76,6 +76,7 @@ class MedisanaBS444Coordinator(DataUpdateCoordinator[dict[int, UserMeasurement]]
     @callback
     def async_start(self) -> None:
         """Start listening for advertisements from the scale."""
+        _LOGGER.debug("Registering Bluetooth advertisement callback for %s", self.address)
         self._unregister_callback = bluetooth.async_register_callback(
             self.hass,
             self._async_advertisement_callback,
@@ -87,6 +88,7 @@ class MedisanaBS444Coordinator(DataUpdateCoordinator[dict[int, UserMeasurement]]
     def async_stop(self) -> None:
         """Stop listening for advertisements."""
         if self._unregister_callback is not None:
+            _LOGGER.debug("Unregistering Bluetooth advertisement callback for %s", self.address)
             self._unregister_callback()
             self._unregister_callback = None
 
@@ -97,14 +99,27 @@ class MedisanaBS444Coordinator(DataUpdateCoordinator[dict[int, UserMeasurement]]
         change: bluetooth.BluetoothChange,
     ) -> None:
         """Handle a new advertisement seen by any (proxied) Bluetooth adapter."""
+        _LOGGER.debug(
+            "Advertisement seen for %s from source %s (rssi=%s, change=%s)",
+            self.address,
+            service_info.source,
+            service_info.rssi,
+            change,
+        )
         if self._connect_lock.locked():
             # Already connecting/connected to the scale, nothing to do.
+            _LOGGER.debug(
+                "Ignoring advertisement for %s, a connection attempt is already in progress",
+                self.address,
+            )
             return
         self.hass.async_create_task(self._async_connect_and_read())
 
     async def _async_connect_and_read(self) -> None:
         """Connect to the scale, read its data and update listeners."""
+        _LOGGER.debug("Waiting for connect lock for %s", self.address)
         async with self._connect_lock:
+            _LOGGER.debug("Acquired connect lock for %s", self.address)
             ble_device: BLEDevice | None = bluetooth.async_ble_device_from_address(
                 self.hass, self.address, connectable=True
             )
@@ -115,16 +130,31 @@ class MedisanaBS444Coordinator(DataUpdateCoordinator[dict[int, UserMeasurement]]
                 )
                 return
 
+            _LOGGER.debug(
+                "Found connectable Bluetooth device for %s: %s", self.address, ble_device
+            )
+
             try:
                 measurements = await self._async_do_session(ble_device)
             except (BleakError, asyncio.TimeoutError) as err:
-                _LOGGER.debug("Error talking to scale %s: %s", self.address, err)
+                _LOGGER.debug(
+                    "Error talking to scale %s: %s", self.address, err, exc_info=True
+                )
                 return
+            finally:
+                _LOGGER.debug("Releasing connect lock for %s", self.address)
 
         if measurements:
+            _LOGGER.debug(
+                "Session with %s produced measurements for users: %s",
+                self.address,
+                sorted(measurements.keys()),
+            )
             merged = dict(self.data or {})
             merged.update(measurements)
             self.async_set_updated_data(merged)
+        else:
+            _LOGGER.debug("Session with %s produced no measurements", self.address)
 
     async def _async_do_session(
         self, ble_device: BLEDevice
@@ -135,8 +165,10 @@ class MedisanaBS444Coordinator(DataUpdateCoordinator[dict[int, UserMeasurement]]
 
         @callback
         def _disconnected_callback(_client) -> None:
+            _LOGGER.debug("Scale %s disconnected", self.address)
             disconnected_event.set()
 
+        _LOGGER.debug("Establishing connection to scale %s", self.address)
         client = await establish_connection(
             BleakClientWithServiceCache,
             ble_device,
@@ -144,18 +176,23 @@ class MedisanaBS444Coordinator(DataUpdateCoordinator[dict[int, UserMeasurement]]
             disconnected_callback=_disconnected_callback,
             timeout=CONNECT_TIMEOUT,
         )
+        _LOGGER.debug("Connected to scale %s", self.address)
 
         try:
 
             def _person_handler(_handle, data: bytearray) -> None:
+                _LOGGER.debug("Received person notification from %s: %s", self.address, data.hex())
                 session.add_person(PersonData.decode(bytes(data)))
 
             def _weight_handler(_handle, data: bytearray) -> None:
+                _LOGGER.debug("Received weight notification from %s: %s", self.address, data.hex())
                 session.add_weight(WeightData.decode(bytes(data), self.use_time_offset), now())
 
             def _body_handler(_handle, data: bytearray) -> None:
+                _LOGGER.debug("Received body notification from %s: %s", self.address, data.hex())
                 session.add_body(BodyData.decode(bytes(data), self.use_time_offset), now())
 
+            _LOGGER.debug("Subscribing to notifications from scale %s", self.address)
             await client.start_notify(CHAR_PERSON_UUID, _person_handler)
             await client.start_notify(CHAR_WEIGHT_UUID, _weight_handler)
             await client.start_notify(CHAR_BODY_UUID, _body_handler)
@@ -163,6 +200,11 @@ class MedisanaBS444Coordinator(DataUpdateCoordinator[dict[int, UserMeasurement]]
             # Tell the scale to send its (buffered) measurements, passing our
             # current time so it can timestamp them correctly.
             offset_now = now()
+            _LOGGER.debug(
+                "Requesting scale %s to send buffered measurements (time=%s)",
+                self.address,
+                offset_now,
+            )
             await client.write_gatt_char(
                 CHAR_COMMAND_UUID,
                 b"\x02" + timestamp_to_bytes(offset_now),
@@ -177,6 +219,17 @@ class MedisanaBS444Coordinator(DataUpdateCoordinator[dict[int, UserMeasurement]]
                 )
         finally:
             if client.is_connected:
+                _LOGGER.debug("Disconnecting from scale %s", self.address)
                 await client.disconnect()
 
-        return session.measurements()
+        measurements = session.measurements()
+        _LOGGER.debug(
+            "Session with scale %s complete: %d person(s), %d weight(s), %d body(ies), "
+            "%d combined measurement(s)",
+            self.address,
+            len(session.persons),
+            len(session.weights),
+            len(session.bodies),
+            len(measurements),
+        )
+        return measurements
