@@ -1,1 +1,70 @@
 # medisana-ha
+
+A Home Assistant **custom integration** for Medisana BS410/BS430/BS440/BS444/BS550
+Bluetooth body-composition scales (and other compatible Medisana scales).
+
+## Why this exists
+
+The existing [ESPHome `medisana_bs444` external
+component](https://github.com/bwynants/weegschaal) requires a single ESP32 with
+a `ble_client` dedicated to actively connecting to the scale. That means:
+
+* the scale can only ever be reached by that one ESP32, and
+* if that ESP32 goes offline, all data collection stops.
+
+This integration instead performs the active BLE (GATT) connection **from Home
+Assistant itself**, using the built-in [`bluetooth`
+integration](https://www.home-assistant.io/integrations/bluetooth/). Home
+Assistant automatically picks whichever local Bluetooth adapter or connectable
+[Bluetooth proxy](https://esphome.io/components/bluetooth_proxy.html) (any
+number of them) currently has the best signal to the scale, and transparently
+fails over to another one if it becomes unavailable. This gives you:
+
+1. A scale that shows up as its own device in Home Assistant.
+2. Automatic failover between any number of ESPHome Bluetooth proxies (or a
+   local adapter) — whichever one hears the scale's advertisement services the
+   connection.
+
+## How it works
+
+The scale only advertises/accepts a connection briefly after someone steps on
+it. This integration listens for that advertisement via Home Assistant's
+`bluetooth` integration and, once seen, connects to the scale (through
+whichever adapter/proxy currently has it), subscribes to notifications for its
+person/weight/body-composition characteristics, tells the scale the current
+time, and waits for it to send its data and disconnect. The BLE protocol
+implementation (service/characteristic UUIDs, payload decoding, and the
+1/1/2010 time-offset quirk of the BS410/BS444) is a Python port of the logic in
+the ESPHome `medisana_bs444` component, which itself is based on reverse
+engineering work from https://github.com/keptenkurk/BS440.
+
+## Installation
+
+1. Copy the `custom_components/medisana_bs444` folder from this repository
+   into your Home Assistant `config/custom_components/` directory (or install
+   it via [HACS](https://hacs.xyz/) as a custom repository).
+2. Restart Home Assistant.
+3. Make sure at least one Bluetooth adapter or ESPHome Bluetooth proxy
+   (`bluetooth_proxy` with `active: true`) is set up and in range of the
+   scale.
+4. Step on the scale once so it advertises. Home Assistant should
+   automatically discover it (**Settings → Devices & Services**); alternatively
+   add it manually via **Add Integration → Medisana BS444 Scale**.
+5. During setup, enable **Use time offset** for BS410 and BS444 scales (this
+   matches the ESPHome component's `timeoffset: true` option).
+
+## Entities
+
+For each of the up to 8 user "slots" the scale supports, the integration
+creates (initially enabled only for user 1 — enable additional users'
+entities as needed):
+
+* Sensors: weight, BMI, kcal, fat %, water %, muscle %, bone (kg), age, size.
+* Binary sensors (diagnostic, disabled by default): male, female, high
+  activity.
+
+## Compatibility
+
+Confirmed to work with the same protocol as: BS410, BS430, BS440, BS444,
+BS550. Likely compatible with other Medisana scales using the same GATT
+service (`000078b2-...`).
