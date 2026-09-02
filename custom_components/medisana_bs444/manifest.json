@@ -1,6 +1,6 @@
 {
   "domain": "medisana_bs444",
-  "name": "Medisana BS444 Scale",
+  "name": "Medisana Bluetooth Scale",
   "codeowners": ["@drakarah"],
   "config_flow": true,
   "documentation": "https://github.com/drakarah/medisana-ha",

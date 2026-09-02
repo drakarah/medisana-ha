@@ -15,7 +15,7 @@ CHAR_COMMAND_UUID = "00008a81-0000-1000-8000-00805f9b34fb"
 # Maximum number of user "slots" the scale supports.
 NUM_USERS = 8
 
-# Some scales (BS410, BS444, ...) count time from 1/1/2010 instead of the
+# Some scales (BS410, A45, BS444, ...) count time from 1/1/2010 instead of the
 # unix epoch. This is the offset (in seconds) between the two.
 TIME_OFFSET = 1262304000
 

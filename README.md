@@ -1,7 +1,9 @@
 # medisana-ha
 
-A Home Assistant **custom integration** for Medisana BS410/BS430/BS440/BS444/BS550
-Bluetooth body-composition scales (and other compatible Medisana scales).
+A Home Assistant **custom integration** for Medisana BS410/A45/BS430/BS440/BS444/BS550
+Bluetooth body-composition scales (and other compatible Medisana scales). It's
+not limited to the BS444 — any scale that speaks the same Medisana BLE
+protocol (identified by the `000078b2-...` GATT service) should work.
 
 ## Why this exists
 
@@ -34,7 +36,7 @@ whichever adapter/proxy currently has it), subscribes to notifications for its
 person/weight/body-composition characteristics, tells the scale the current
 time, and waits for it to send its data and disconnect. The BLE protocol
 implementation (service/characteristic UUIDs, payload decoding, and the
-1/1/2010 time-offset quirk of the BS410/BS444) is a Python port of the logic in
+1/1/2010 time-offset quirk of the BS410/A45/BS444) is a Python port of the logic in
 the ESPHome `medisana_bs444` component, which itself is based on reverse
 engineering work from https://github.com/keptenkurk/BS440.
 
@@ -49,7 +51,7 @@ store, so add it as a **custom repository**:
 2. Click the **⋮** menu (top right) → **Custom repositories**.
 3. Add `https://github.com/drakarah/medisana-ha` as the repository URL, and
    choose **Integration** as the category.
-4. Find **Medisana BS444 Scale** in HACS and click **Download**.
+4. Find **Medisana Bluetooth Scale** in HACS and click **Download**.
 5. Restart Home Assistant.
 
 ### Option B: Manual install
@@ -65,9 +67,9 @@ store, so add it as a **custom repository**:
    scale.
 2. Step on the scale once so it advertises. Home Assistant should
    automatically discover it (**Settings → Devices & Services**); alternatively
-   add it manually via **Add Integration → Medisana BS444 Scale**.
-3. During setup, enable **Use time offset** for BS410 and BS444 scales (this
-   matches the ESPHome component's `timeoffset: true` option).
+   add it manually via **Add Integration → Medisana Bluetooth Scale**.
+3. During setup, enable **Use time offset** for BS410, A45 and BS444 scales
+   (this matches the ESPHome component's `timeoffset: true` option).
 
 ## Entities
 
@@ -75,12 +77,12 @@ For each of the up to 8 user "slots" the scale supports, the integration
 creates (initially enabled only for user 1 — enable additional users'
 entities as needed):
 
-* Sensors: weight, BMI, kcal, fat %, water %, muscle %, bone (kg), age, size.
-* Binary sensors (diagnostic, disabled by default): male, female, high
-  activity.
+* Sensors: weight, BMI, kcal, fat %, water %, muscle %, bone (kg), age, size,
+  sex (diagnostic, disabled by default).
+* Binary sensors (diagnostic, disabled by default): high activity.
 
 ## Compatibility
 
-Confirmed to work with the same protocol as: BS410, BS430, BS440, BS444,
+Confirmed to work with the same protocol as: A45, BS410, BS430, BS440, BS444,
 BS550. Likely compatible with other Medisana scales using the same GATT
-service (`000078b2-...`).
+service (`000078b2-...`), regardless of what the integration's name suggests.

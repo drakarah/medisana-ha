@@ -160,7 +160,7 @@ class MedisanaBS444Sensor(
             identifiers={(DOMAIN, entry.unique_id or entry.entry_id)},
             name=entry.title,
             manufacturer="Medisana",
-            model="BS444",
+            model="Bluetooth Scale",
         )
         # Only enable user 1's sensors by default; other users can be
         # enabled by whoever configures additional profiles on the scale.

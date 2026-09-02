@@ -79,7 +79,7 @@ class MedisanaBS444BinarySensor(
             identifiers={(DOMAIN, entry.unique_id or entry.entry_id)},
             name=entry.title,
             manufacturer="Medisana",
-            model="BS444",
+            model="Bluetooth Scale",
         )
         if user_id > 1:
             self._attr_entity_registry_enabled_default = False
