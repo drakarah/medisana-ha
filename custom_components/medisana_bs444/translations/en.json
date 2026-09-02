@@ -22,20 +22,45 @@
   },
   "entity": {
     "sensor": {
-      "weight": { "name": "Weight user {user_id}" },
-      "bmi": { "name": "BMI user {user_id}" },
-      "kcal": { "name": "kcal user {user_id}" },
-      "fat": { "name": "Fat user {user_id}" },
-      "tbw": { "name": "Water user {user_id}" },
-      "muscle": { "name": "Muscle user {user_id}" },
-      "bone": { "name": "Bone user {user_id}" },
-      "age": { "name": "Age user {user_id}" },
-      "size": { "name": "Size user {user_id}" }
+      "weight": {
+        "name": "Weight user {user_id}"
+      },
+      "bmi": {
+        "name": "BMI user {user_id}"
+      },
+      "kcal": {
+        "name": "kcal user {user_id}"
+      },
+      "fat": {
+        "name": "Fat user {user_id}"
+      },
+      "tbw": {
+        "name": "Water user {user_id}"
+      },
+      "muscle": {
+        "name": "Muscle user {user_id}"
+      },
+      "bone": {
+        "name": "Bone user {user_id}"
+      },
+      "age": {
+        "name": "Age user {user_id}"
+      },
+      "size": {
+        "name": "Size user {user_id}"
+      },
+      "sex": {
+        "name": "Sex user {user_id}",
+        "state": {
+          "male": "Male",
+          "female": "Female"
+        }
+      }
     },
     "binary_sensor": {
-      "male": { "name": "Male user {user_id}" },
-      "female": { "name": "Female user {user_id}" },
-      "high_activity": { "name": "High activity user {user_id}" }
+      "high_activity": {
+        "name": "High activity user {user_id}"
+      }
     }
   }
 }
