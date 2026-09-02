@@ -10,6 +10,7 @@ from homeassistant.components.binary_sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -28,22 +29,9 @@ class MedisanaBinarySensorEntityDescription(BinarySensorEntityDescription):
 
 BINARY_SENSOR_DESCRIPTIONS: tuple[MedisanaBinarySensorEntityDescription, ...] = (
     MedisanaBinarySensorEntityDescription(
-        key="male",
-        translation_key="male",
-        entity_category=EntityCategory.DIAGNOSTIC,
-        entity_registry_enabled_default=False,
-        value_fn=lambda m: m.is_male,
-    ),
-    MedisanaBinarySensorEntityDescription(
-        key="female",
-        translation_key="female",
-        entity_category=EntityCategory.DIAGNOSTIC,
-        entity_registry_enabled_default=False,
-        value_fn=lambda m: not m.is_male,
-    ),
-    MedisanaBinarySensorEntityDescription(
         key="high_activity",
         translation_key="high_activity",
+        icon="mdi:run",
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
         value_fn=lambda m: m.high_activity,
@@ -87,6 +75,12 @@ class MedisanaBS444BinarySensor(
         self._user_id = user_id
         self._attr_unique_id = f"{entry.unique_id}_user{user_id}_{description.key}"
         self._attr_translation_placeholders = {"user_id": str(user_id)}
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.unique_id or entry.entry_id)},
+            name=entry.title,
+            manufacturer="Medisana",
+            model="Bluetooth Scale",
+        )
         if user_id > 1:
             self._attr_entity_registry_enabled_default = False
 

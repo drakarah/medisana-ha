@@ -17,6 +17,7 @@ from homeassistant.const import (
     UnitOfMass,
 )
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -37,6 +38,7 @@ SENSOR_DESCRIPTIONS: tuple[MedisanaSensorEntityDescription, ...] = (
     MedisanaSensorEntityDescription(
         key="weight",
         translation_key="weight",
+        icon="mdi:scale-bathroom",
         native_unit_of_measurement=UnitOfMass.KILOGRAMS,
         device_class=SensorDeviceClass.WEIGHT,
         state_class=SensorStateClass.MEASUREMENT,
@@ -45,12 +47,14 @@ SENSOR_DESCRIPTIONS: tuple[MedisanaSensorEntityDescription, ...] = (
     MedisanaSensorEntityDescription(
         key="bmi",
         translation_key="bmi",
+        icon="mdi:human",
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda m: m.bmi,
     ),
     MedisanaSensorEntityDescription(
         key="kcal",
         translation_key="kcal",
+        icon="mdi:fire",
         native_unit_of_measurement="kcal",
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda m: m.kcal,
@@ -58,6 +62,7 @@ SENSOR_DESCRIPTIONS: tuple[MedisanaSensorEntityDescription, ...] = (
     MedisanaSensorEntityDescription(
         key="fat",
         translation_key="fat",
+        icon="mdi:water-percent",
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda m: m.fat,
@@ -65,6 +70,7 @@ SENSOR_DESCRIPTIONS: tuple[MedisanaSensorEntityDescription, ...] = (
     MedisanaSensorEntityDescription(
         key="tbw",
         translation_key="tbw",
+        icon="mdi:water",
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda m: m.tbw,
@@ -72,6 +78,7 @@ SENSOR_DESCRIPTIONS: tuple[MedisanaSensorEntityDescription, ...] = (
     MedisanaSensorEntityDescription(
         key="muscle",
         translation_key="muscle",
+        icon="mdi:arm-flex",
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda m: m.muscle,
@@ -79,6 +86,7 @@ SENSOR_DESCRIPTIONS: tuple[MedisanaSensorEntityDescription, ...] = (
     MedisanaSensorEntityDescription(
         key="bone",
         translation_key="bone",
+        icon="mdi:bone",
         native_unit_of_measurement=UnitOfMass.KILOGRAMS,
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda m: m.bone,
@@ -86,6 +94,7 @@ SENSOR_DESCRIPTIONS: tuple[MedisanaSensorEntityDescription, ...] = (
     MedisanaSensorEntityDescription(
         key="age",
         translation_key="age",
+        icon="mdi:calendar-account",
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
         value_fn=lambda m: m.age or None,
@@ -93,10 +102,20 @@ SENSOR_DESCRIPTIONS: tuple[MedisanaSensorEntityDescription, ...] = (
     MedisanaSensorEntityDescription(
         key="size",
         translation_key="size",
+        icon="mdi:human-male-height",
         native_unit_of_measurement=UnitOfLength.CENTIMETERS,
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
         value_fn=lambda m: round(m.size * 100) if m.size else None,
+    ),
+    MedisanaSensorEntityDescription(
+        key="sex",
+        translation_key="sex",
+        device_class=SensorDeviceClass.ENUM,
+        options=["male", "female"],
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        value_fn=lambda m: "male" if m.is_male else "female",
     ),
 )
 
@@ -137,6 +156,12 @@ class MedisanaBS444Sensor(
         self._user_id = user_id
         self._attr_unique_id = f"{entry.unique_id}_user{user_id}_{description.key}"
         self._attr_translation_placeholders = {"user_id": str(user_id)}
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.unique_id or entry.entry_id)},
+            name=entry.title,
+            manufacturer="Medisana",
+            model="Bluetooth Scale",
+        )
         # Only enable user 1's sensors by default; other users can be
         # enabled by whoever configures additional profiles on the scale.
         if user_id > 1:
