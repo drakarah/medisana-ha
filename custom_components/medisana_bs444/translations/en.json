@@ -55,6 +55,9 @@
           "male": "Male",
           "female": "Female"
         }
+      },
+      "last_measurement": {
+        "name": "Last measurement user {user_id}"
       }
     },
     "binary_sensor": {

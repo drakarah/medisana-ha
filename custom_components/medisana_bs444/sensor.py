@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime, timezone
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -31,7 +32,7 @@ from .parser import UserMeasurement
 class MedisanaSensorEntityDescription(SensorEntityDescription):
     """Describes a Medisana BS444 sensor entity."""
 
-    value_fn: Callable[[UserMeasurement], float | int | None]
+    value_fn: Callable[[UserMeasurement], float | int | datetime | None]
 
 
 SENSOR_DESCRIPTIONS: tuple[MedisanaSensorEntityDescription, ...] = (
@@ -117,6 +118,18 @@ SENSOR_DESCRIPTIONS: tuple[MedisanaSensorEntityDescription, ...] = (
         entity_registry_enabled_default=False,
         value_fn=lambda m: "male" if m.is_male else "female",
     ),
+    MedisanaSensorEntityDescription(
+        key="last_measurement",
+        translation_key="last_measurement",
+        icon="mdi:clock-outline",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda m: (
+            datetime.fromtimestamp(m.timestamp, tz=timezone.utc)
+            if m.timestamp
+            else None
+        ),
+    ),
 )
 
 
@@ -176,7 +189,7 @@ class MedisanaBS444Sensor(
         return super().available and self._measurement is not None
 
     @property
-    def native_value(self) -> float | int | None:
+    def native_value(self) -> float | int | datetime | None:
         measurement = self._measurement
         if measurement is None:
             return None
