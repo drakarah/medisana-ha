@@ -10,9 +10,9 @@
   "codeowners": ["@drakarah"],
   "config_flow": true,
   "dependencies": ["bluetooth"],
-  "documentation": "https://github.com/drakarah/medisana-ha",
+  "documentation": "https://github.com/drakarah/medisana-scale-ha-integration",
   "iot_class": "local_push",
-  "issue_tracker": "https://github.com/drakarah/medisana-ha/issues",
+  "issue_tracker": "https://github.com/drakarah/medisana-scale-ha-integration/issues",
   "requirements": ["bleak-retry-connector>=3.4.0"],
   "version": "1.0.0"
 }
