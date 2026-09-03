@@ -1,5 +1,8 @@
 # medisana-ha
 
+[![Validate](https://github.com/drakarah/medisana-ha/actions/workflows/validate.yml/badge.svg)](https://github.com/drakarah/medisana-ha/actions/workflows/validate.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A Home Assistant **custom integration** for Medisana BS410/A45/BS430/BS440/BS444/BS550
 Bluetooth body-composition scales (and other compatible Medisana scales). It's
 not limited to the BS444 — any scale that speaks the same Medisana BLE
@@ -86,3 +89,7 @@ entities as needed):
 Confirmed to work with the same protocol as: A45, BS410, BS430, BS440, BS444,
 BS550. Likely compatible with other Medisana scales using the same GATT
 service (`000078b2-...`), regardless of what the integration's name suggests.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
