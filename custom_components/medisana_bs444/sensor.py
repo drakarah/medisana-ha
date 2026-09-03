@@ -106,7 +106,6 @@ SENSOR_DESCRIPTIONS: tuple[MedisanaSensorEntityDescription, ...] = (
         icon="mdi:human-male-height",
         native_unit_of_measurement=UnitOfLength.CENTIMETERS,
         entity_category=EntityCategory.DIAGNOSTIC,
-        entity_registry_enabled_default=False,
         value_fn=lambda m: round(m.size * 100) if m.size else None,
     ),
     MedisanaSensorEntityDescription(
