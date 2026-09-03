@@ -74,6 +74,9 @@ class MedisanaBS444BinarySensor(
         self.entity_description = description
         self._user_id = user_id
         self._attr_unique_id = f"{entry.unique_id}_user{user_id}_{description.key}"
+        self._attr_suggested_object_id = (
+            f"{entry.unique_id}_{description.key}_user_{user_id}"
+        )
         self._attr_translation_placeholders = {"user_id": str(user_id)}
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.unique_id or entry.entry_id)},
