@@ -1,4 +1,4 @@
-# medisana-ha
+# Home assistant custom integration for Medisana scales
 
 [![Validate](https://github.com/drakarah/medisana-ha/actions/workflows/validate.yml/badge.svg)](https://github.com/drakarah/medisana-ha/actions/workflows/validate.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
