@@ -81,8 +81,8 @@ creates (initially enabled only for user 1 — enable additional users'
 entities as needed):
 
 * Sensors: weight, BMI, kcal, fat %, water %, muscle %, bone (kg), age, size,
-  sex (diagnostic, disabled by default).
-* Binary sensors (diagnostic, disabled by default): high activity.
+  sex (diagnostic).
+* Binary sensors (diagnostic): high activity.
 
 ## Compatibility
 
